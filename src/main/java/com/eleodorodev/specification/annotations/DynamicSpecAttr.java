@@ -1,15 +1,18 @@
-package br.com.evertec.sinqia.contabil.specification.annotations;
+package com.eleodorodev.specification.annotations;
 
 
-import br.com.evertec.sinqia.contabil.specification.enums.Conditional;
-import br.com.evertec.sinqia.contabil.specification.enums.Conjunction;
+import com.eleodorodev.specification.enums.Conditional;
+import com.eleodorodev.specification.enums.Conjunction;
 
 import java.lang.annotation.*;
 
+/**
+ * Note to configure filters in your entity or DTO
+ */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})
-public @interface SpecAttr {
+public @interface DynamicSpecAttr {
   String property();
   String alias() default "";
   String[] parents() default {};

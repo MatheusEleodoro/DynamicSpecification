@@ -1,4 +1,4 @@
-package br.com.evertec.sinqia.contabil.specification.enums;
+package com.eleodorodev.specification.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
