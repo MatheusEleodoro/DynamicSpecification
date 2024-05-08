@@ -1,6 +1,7 @@
 package com.eleodorodev.specification;
 
 
+import com.eleodorodev.specification.params.QueryString;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.util.Pair;
@@ -194,5 +195,9 @@ public interface DynamicSpecification<T> extends Specification<T> {
      */
     static <T> DynamicSpecification<T> not(@Nullable Specification<T> spec) {
         return spec == null ? (root, query, builder) -> null : (root, query, builder) -> builder.not(spec.toPredicate(root, query, builder));
+    }
+
+    static <T> Specification<T> where(@Nullable Specification<T> spec) {
+        return Specification.where(spec);
     }
 }

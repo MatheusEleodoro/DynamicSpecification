@@ -10,7 +10,7 @@ import java.util.*;
  *
  * @author <a href="https://github.com/MatheusEleodoro">Matheus Eleodoro</a>
  * @version 1.0.0
- * @see  <a href="https://github.com/MatheusEleodoro">...</a>
+ * @see <a href="https://github.com/MatheusEleodoro">...</a>
  */
 public interface DynamicFilter {
 
@@ -25,7 +25,6 @@ public interface DynamicFilter {
      */
     static <R, T> DynamicSpecification<R> toEquals(T compare, String attribute, String... parents) {
         return (root, query, builder) -> {
-            List<Predicate> predicates = new ArrayList<>();
             if (isNotEmpty(compare)) {
                 Path<T> campoId;
                 if (parents != null) {
@@ -34,9 +33,9 @@ public interface DynamicFilter {
                 } else {
                     campoId = root.get(attribute);
                 }
-                predicates.add(builder.equal(campoId, compare));
+                return builder.and(Collections.singletonList(builder.equal(campoId, compare)).toArray(new Predicate[0]));
             }
-            return builder.and(predicates.toArray(new Predicate[0]));
+            return null;
         };
     }
 
@@ -74,9 +73,11 @@ public interface DynamicFilter {
                 } else {
                     campoCompare = root.get(attribute);
                 }
-                predicates.add(builder.like(builder.lower(campoCompare), "%" + compare.toString().toLowerCase(Locale.ROOT) + "%"));
+                return builder.and(Collections.singletonList(builder.like(builder
+                                .lower(campoCompare), "%" + compare.toString().toLowerCase(Locale.ROOT) + "%"))
+                        .toArray(new Predicate[0]));
             }
-            return builder.and(predicates.toArray(new Predicate[0]));
+            return null;
         };
     }
 
@@ -106,7 +107,6 @@ public interface DynamicFilter {
      */
     static <T extends Comparable<T>, R> DynamicSpecification<R> toBetween(T start, T end, String attribute, String... parents) {
         return (root, query, builder) -> {
-            List<Predicate> predicates = new ArrayList<>();
             if (isNotEmpty(start) && isNotEmpty(end)) {
                 Path<T> attr;
                 if (parents != null) {
@@ -115,9 +115,9 @@ public interface DynamicFilter {
                 } else {
                     attr = root.get(attribute);
                 }
-                predicates.add(builder.between(attr, start, end));
+                return builder.and(Collections.singletonList(builder.between(attr, start, end)).toArray(new Predicate[0]));
             }
-            return builder.and(predicates.toArray(new Predicate[0]));
+            return null;
         };
     }
 
@@ -157,8 +157,9 @@ public interface DynamicFilter {
                     campo = root.get(attribute);
                 }
                 predicates.add(campo.in(compare));
+                return builder.and(predicates.toArray(new Predicate[0]));
             }
-            return builder.and(predicates.toArray(new Predicate[0]));
+            return null;
         };
     }
 
@@ -187,7 +188,6 @@ public interface DynamicFilter {
      */
     static <T extends Comparable<T>, R> DynamicSpecification<R> toGreater(T compare, String attribute, String... parents) {
         return (root, query, builder) -> {
-            List<Predicate> predicates = new ArrayList<>();
             if (isNotEmpty(compare)) {
                 Path<T> campoId;
                 if (parents != null) {
@@ -196,9 +196,9 @@ public interface DynamicFilter {
                 } else {
                     campoId = root.get(attribute);
                 }
-                predicates.add(builder.greaterThan(campoId, compare));
+                return builder.and(Collections.singletonList(builder.greaterThan(campoId, compare)).toArray(new Predicate[0]));
             }
-            return builder.and(predicates.toArray(new Predicate[0]));
+            return null;
         };
     }
 
@@ -213,7 +213,6 @@ public interface DynamicFilter {
      */
     static <T extends Comparable<T>, R> DynamicSpecification<R> toGreaterEqualTo(T compare, String attribute, String... parents) {
         return (root, query, builder) -> {
-            List<Predicate> predicates = new ArrayList<>();
             if (isNotEmpty(compare)) {
                 Path<T> campoId;
                 if (parents != null) {
@@ -222,9 +221,9 @@ public interface DynamicFilter {
                 } else {
                     campoId = root.get(attribute);
                 }
-                predicates.add(builder.greaterThanOrEqualTo(campoId, compare));
+                return builder.and(Collections.singletonList(builder.greaterThanOrEqualTo(campoId, compare)).toArray(new Predicate[0]));
             }
-            return builder.and(predicates.toArray(new Predicate[0]));
+            return null;
         };
     }
 
@@ -239,7 +238,6 @@ public interface DynamicFilter {
      */
     static <T extends Comparable<T>, R> DynamicSpecification<R> toLess(T compare, String attribute, String... parents) {
         return (root, query, builder) -> {
-            List<Predicate> predicates = new ArrayList<>();
             if (isNotEmpty(compare)) {
                 Path<T> campoId;
                 if (parents != null) {
@@ -248,9 +246,9 @@ public interface DynamicFilter {
                 } else {
                     campoId = root.get(attribute);
                 }
-                predicates.add(builder.lessThan(campoId, compare));
+                return builder.and(Collections.singletonList(builder.lessThan(campoId, compare)).toArray(new Predicate[0]));
             }
-            return builder.and(predicates.toArray(new Predicate[0]));
+            return null;
         };
     }
 
@@ -265,7 +263,6 @@ public interface DynamicFilter {
      */
     static <T extends Comparable<T>, R> DynamicSpecification<R> toLessEqualTo(T compare, String attribute, String... parents) {
         return (root, query, builder) -> {
-            List<Predicate> predicates = new ArrayList<>();
             if (isNotEmpty(compare)) {
                 Path<T> campoId;
                 if (parents != null) {
@@ -274,9 +271,50 @@ public interface DynamicFilter {
                 } else {
                     campoId = root.get(attribute);
                 }
-                predicates.add(builder.lessThanOrEqualTo(campoId, compare));
+                return builder.and(Collections.singletonList(builder.lessThanOrEqualTo(campoId, compare)).toArray(new Predicate[0]));
             }
-            return builder.and(predicates.toArray(new Predicate[0]));
+            return null;
+        };
+    }
+    /**
+     * DynamicSpecification toIsNull
+     *
+     * @param attribute - name of the attribute to be queried
+     * @param parents   - optional parameter that should be informed the parents where the attribute is nested
+     * @return predicates - {@link DynamicSpecification<T>}
+     * @apiNote Responsible for checking if value is null
+     */
+    static <T> DynamicSpecification<T> toIsNull(String attribute, String... parents) {
+        return (root, query, builder) -> {
+            Path<T> campoId;
+            if (parents != null) {
+                Path<T> parentsPath = getPathRoot(root, parents);
+                campoId = parentsPath.get(attribute);
+            } else {
+                campoId = root.get(attribute);
+            }
+            return builder.and(Collections.singletonList(builder.isNull(campoId)).toArray(new Predicate[0]));
+        };
+    }
+
+    /**
+     * DynamicSpecification toIsNull
+     *
+     * @param attribute - name of the attribute to be queried
+     * @param parents   - optional parameter that should be informed the parents where the attribute is nested
+     * @return predicates - {@link DynamicSpecification<T>}
+     * @apiNote Responsible for checking if value is not null
+     */
+    static <T> DynamicSpecification<T> toIsNotNull(String attribute, String... parents) {
+        return (root, query, builder) -> {
+            Path<T> campoId;
+            if (parents != null) {
+                Path<T> parentsPath = getPathRoot(root, parents);
+                campoId = parentsPath.get(attribute);
+            } else {
+                campoId = root.get(attribute);
+            }
+            return builder.and(Collections.singletonList(builder.isNotNull(campoId)).toArray(new Predicate[0]));
         };
     }
 
