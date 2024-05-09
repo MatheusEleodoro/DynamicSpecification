@@ -2,6 +2,7 @@ package com.eleodorodev.specification;
 
 
 import com.eleodorodev.specification.params.QueryString;
+import com.eleodorodev.specification.params.QueryStringConverter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.util.Pair;
@@ -152,10 +153,10 @@ public interface DynamicSpecification<T> extends Specification<T> {
                         spec.or(negate ? DynamicFilter.toNotContains(DynamicFilter.castList(value), property, parents) : DynamicFilter.toContains(DynamicFilter.castList(value), property, parents));
                 case BW ->
                         spec.or(negate ? DynamicFilter.toNotBetween(element.getFirst(), element.get(1), property, parents) : DynamicFilter.toBetween(element.getFirst(), element.get(1), property, parents));
-                case GT -> spec.or(DynamicFilter.toGreater(((Long) value), property, parents));
-                case GTE -> spec.or(DynamicFilter.toGreaterEqualTo(((Long) value), property, parents));
-                case LT -> spec.or(DynamicFilter.toLess(((Long) value), property, parents));
-                case LTE -> spec.or(DynamicFilter.toLessEqualTo(((Long) value), property, parents));
+                case GT -> spec.or(DynamicFilter.toGreater(QueryStringConverter.parseNumber(value.toString()), property, parents));
+                case GTE -> spec.or(DynamicFilter.toGreaterEqualTo(QueryStringConverter.parseNumber(value.toString()), property, parents));
+                case LT -> spec.or(DynamicFilter.toLess(QueryStringConverter.parseNumber(value.toString()), property, parents));
+                case LTE -> spec.or(DynamicFilter.toLessEqualTo(QueryStringConverter.parseNumber(value.toString()), property, parents));
                 default ->
                         spec.or(negate ? DynamicFilter.toNotEquals(value, property, parents) : DynamicFilter.toEquals(value, property, parents));
             };
@@ -178,10 +179,10 @@ public interface DynamicSpecification<T> extends Specification<T> {
                         Specification.where(negate ? DynamicFilter.toNotContains(((List<?>) value), property, parents) : DynamicFilter.toContains(((List<?>) value), property, parents));
                 case BW ->
                         Specification.where(negate ? DynamicFilter.toNotBetween(element.getFirst(), element.get(1), property, parents) : DynamicFilter.toBetween(element.getFirst(), element.get(1), property, parents));
-                case GT -> Specification.where(DynamicFilter.toGreater(((Long) value), property, parents));
-                case GTE -> Specification.where(DynamicFilter.toGreaterEqualTo(((Long) value), property, parents));
-                case LT -> Specification.where(DynamicFilter.toLess(((Long) value), property, parents));
-                case LTE -> Specification.where(DynamicFilter.toLessEqualTo(((Long) value), property, parents));
+                case GT -> Specification.where(DynamicFilter.toGreater(QueryStringConverter.parseNumber(value.toString()), property, parents));
+                case GTE -> Specification.where(DynamicFilter.toGreaterEqualTo(QueryStringConverter.parseNumber(value.toString()), property, parents));
+                case LT -> Specification.where(DynamicFilter.toLess(QueryStringConverter.parseNumber(value.toString()), property, parents));
+                case LTE -> Specification.where(DynamicFilter.toLessEqualTo(QueryStringConverter.parseNumber(value.toString()), property, parents));
                 default ->
                         Specification.where(negate ? DynamicFilter.toNotEquals(value, property, parents) : DynamicFilter.toEquals(value, property, parents));
             };

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Arrays;
@@ -59,6 +60,10 @@ public class QueryStringConverter implements Converter<String, QueryString> {
     public static <T> T parseNumber(String str) {
         try {
             if (!str.matches("\\d*\\.?\\d+")) throw new ParseException("", 0);
+            Number number = NumberFormat.getInstance().parse(str);
+            if(number instanceof Double n && n.byteValue() < 0) {
+                return (T) new BigDecimal(str);
+            }
             return ((T) NumberFormat.getNumberInstance().parse(str));
         } catch (ParseException e) {
             return ((T) str);

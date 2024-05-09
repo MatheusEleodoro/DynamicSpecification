@@ -59,8 +59,13 @@
 
 
   <distributionManagement>
-    <!-- Configurações de distribuição do pacote -->
+    <repository>
+      <id>github</id>
+      <name>Dynamic Specification</name>
+      <url>https://maven.pkg.github.com/MatheusEleodoro/DynamicSpecification</url>
+    </repository>
   </distributionManagement>
+
 
 
 </project>
