@@ -1,6 +1,14 @@
 package com.eleodorodev.specification;
 
-import org.springframework.data.jpa.domain.Specification;
+import com.eleodorodev.specification.params.QueryString;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.data.util.Pair;
+
+import java.beans.PropertyDescriptor;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * BaseDynamicFilter
@@ -8,9 +16,22 @@ import org.springframework.data.jpa.domain.Specification;
  * @author <a href="https://github.com/MatheusEleodoro">Matheus Eleodoro</a>
  * @version 1.0.0
  * @apiNote To standardize classes that will implement filters in the body
- * @see  <a href="https://github.com/MatheusEleodoro">...</a>
+ * @see <a href="https://github.com/MatheusEleodoro">...</a>
  */
-@FunctionalInterface
-public interface BaseDynamicFilter<T> {
-    Specification<T> apply();
+
+public abstract class BaseDynamicFilter implements Serializable {
+
+    public QueryString toQueryString() {
+        Map<String, Pair<Object, String>> map = new HashMap<>();
+        BeanWrapper wrapper = new BeanWrapperImpl(this);
+
+        for (PropertyDescriptor propertyDescriptor : wrapper.getPropertyDescriptors()) {
+            String propertyName = propertyDescriptor.getName();
+            Object propertyValue = wrapper.getPropertyValue(propertyName);
+            if (propertyValue != null && !(propertyValue instanceof Class<?>)) {
+                map.put(propertyName, Pair.of(propertyValue, ""));
+            }
+        }
+        return new QueryString(map);
+    }
 }
