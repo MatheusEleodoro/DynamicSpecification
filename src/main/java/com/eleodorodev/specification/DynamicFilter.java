@@ -64,7 +64,6 @@ public interface DynamicFilter {
      */
     static <T> DynamicSpecification<T> toLike(Object compare, String attribute, String... parents) {
         return (root, query, builder) -> {
-            List<Predicate> predicates = new ArrayList<>();
             if (StringUtils.hasText((String) compare)) {
                 Path<String> campoCompare;
                 if (parents != null) {

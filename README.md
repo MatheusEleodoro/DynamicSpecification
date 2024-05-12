@@ -1,4 +1,4 @@
-# Dynamic Specification!
+# Dynamic Specification! `1.0.0`
 
 ## O que é? / What is it?
 É um conjunto de funcionalidades que permite configurar e habilitar filtros dinâmicos em APIs Java Spring. As implementações contidas aqui permitem a criação simplificada de consultas e queries complexas com uma implementação muito fácil.
@@ -221,9 +221,48 @@ public Collection<Countries> exemple(@RequestParam(name = "q") QueryString query
 // Searching for Countries with id between (bw) 1 and 10 and population greater than or equal (gte) than 212000000
 localhost:8082/test?q=id=1,10;bw&population=212000000;gte
 ```
+## Descrição de atributos / Attribute description
+
+### @DynamicSpecAttr
+Anotação para configurar as colunas que farão parte do filtro
+Annotation to configure the columns that will be part of the filter
+
+- `property` - nome da propriedade da entidade ou dto que ela esta anotada <br>
+- `alias` - apelido para a propriedade
+- `parents` - <`Opcional`> Lista com o caminho onde está seu attribute Ex. {"objA",objB} significa que o property está dentro do objB que por vez se encontra dentro do objA,
+- `conjunction` - tipo de conjunção que a o atributo padrão é AND
+- `conditional` - condicional que a consulta por aquele atributo será feita padrão é EQ
+- `negate` - booleano indica se será uma consulta de negação ou não
+- 
+---
+- `property` - name of the entity's property or what it is annotated with <br>
+- `alias` - nickname for the property
+- `parents` - <`Optional`> List with the path where your attribute is Ex. {"objA",objB} means that the property is inside objB which in turn is inside objA,
+- `conjunction` - type of conjunction whose default attribute is AND
+- `conditional` - conditional that the query for that attribute will be done, default is EQ
+- `negate` - boolean indicates whether it will be a deny query or not
 
 
 
+### Conditional(Enum)
+Representa operadores lógicos de SQL
+Represents logical SQL operators
+- `EQ("Equals")`: "="
+- `LK ("Like")`: LIKE %valor%
+- `CT ("Contains")`: IN (1,2,3)
+- `BW ("Between")`: BETWEEN 1 and 3
+- `GT ("GreaterThan")`: > 3
+- `LT ("LessThan")`: < 3
+- `LTE ("LessThanEqualTo")`: <= 3
+- `GTE ("GreaterThanEqualTo")`: >= 3
+- `NOT ("Negate")`: NOT 
+
+
+## Conjunction
+Representa os operadores de junção de clausulas WHERE AND,OR
+Represents the clause joining operators WHERE AND,OR
+- `AND("And")`,
+- `OR("Or")`;
 
 
 
