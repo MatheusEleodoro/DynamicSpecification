@@ -3,6 +3,8 @@ package com.eleodorodev.specification;
 
 import com.eleodorodev.specification.params.QueryString;
 import com.eleodorodev.specification.params.QueryStringConverter;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.util.Pair;
@@ -104,8 +106,8 @@ public interface DynamicSpecification<T> extends Specification<T> {
         return Specification.where(spec);
     }
 
-
-   class DynamicSpecificationBuilder {
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    class DynamicSpecificationBuilder {
 
         /**
          * Apply the binds - INTERNAL
@@ -130,7 +132,7 @@ public interface DynamicSpecification<T> extends Specification<T> {
          * Create WHERE - INTERNAL
          */
         static <T> Specification<T> execWhere(boolean negate, Object value, String property, String[] parents,
-                                       Conditional conditional) throws DynamicSpecificationException {
+                                              Conditional conditional) throws DynamicSpecificationException {
             try {
                 List<Long> element = DynamicFilter.castList(value);
                 return switch (conditional) {
@@ -161,7 +163,7 @@ public interface DynamicSpecification<T> extends Specification<T> {
          * Create OR - INTERNAL
          */
         static <T> Specification<T> execOr(boolean negate, Object value, String property, String[] parents,
-                                    Conditional conditional, Specification<T> spec) throws DynamicSpecificationException {
+                                           Conditional conditional, Specification<T> spec) throws DynamicSpecificationException {
 
             try {
                 List<Long> element = DynamicFilter.castList(value);
@@ -192,7 +194,7 @@ public interface DynamicSpecification<T> extends Specification<T> {
          * Create AND - INTERNAL
          */
         static <T> Specification<T> execAnd(boolean negate, Object value, String property, String[] parents,
-                                     Conditional conditional, Specification<T> spec) throws DynamicSpecificationException {
+                                            Conditional conditional, Specification<T> spec) throws DynamicSpecificationException {
             try {
                 List<Long> element = DynamicFilter.castList(value);
                 return switch (conditional) {
@@ -206,8 +208,7 @@ public interface DynamicSpecification<T> extends Specification<T> {
                     case GTE -> spec.and(DynamicFilter.toGreaterEqualTo(((Long) value), property, parents));
                     case LT -> spec.and(DynamicFilter.toLess(((Long) value), property, parents));
                     case LTE -> spec.and(DynamicFilter.toLessEqualTo(((Long) value), property, parents));
-                    default ->
-                            spec.and(negate ? DynamicFilter.toNotEquals(value, property, parents) : DynamicFilter.toEquals(value, property, parents));
+                    default -> spec.and(negate ? DynamicFilter.toNotEquals(value, property, parents) : DynamicFilter.toEquals(value, property, parents));
                 };
             } catch (RuntimeException e) {
                 throw new DynamicSpecificationException(e);
