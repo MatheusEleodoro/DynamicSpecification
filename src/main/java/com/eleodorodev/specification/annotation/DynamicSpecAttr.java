@@ -1,4 +1,4 @@
-package com.eleodorodev.specification.annotations;
+package com.eleodorodev.specification.annotation;
 
 
 import com.eleodorodev.specification.enums.Conditional;

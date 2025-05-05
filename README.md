@@ -27,7 +27,7 @@ To start using the Dynamic Specification in your project, add the following depe
 <dependency>
     <groupId>com.eleodorodev</groupId>
     <artifactId>dynamic-specification</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 </dependency>
 ```
 ### Crie seu repositório de uma das formas abaixo <br> Create your repository in one of the ways below
@@ -148,21 +148,9 @@ Forma 3:\
 Option 3
 > ✅ **Observação:** Essa forma de implementação trás a facilidade flexibilidade de permitir ao usuario fazer pesquisa conforme suas necessides aplicando seus proprios filtros.<br><br>
 **Note:** This form of implementation brings the flexibility of allowing the user to search according to their needs by applying their own filters.
-```java
-// Crie uma classe de configuração e adicione o QueryStringConverter a os formatters
-// Create a configuration class and add the QueryStringConverter to the formatters
-import com.eleodorodev.specification.params.QueryStringConverter;
-
-@Configuration
-public class WebConfig implements WebMvcConfigurer {
-    @Override
-    public void addFormatters(FormatterRegistry registry) {
-        registry.addConverter(new QueryStringConverter());
-    }
-}
-```
 
 ```java
+// Na sua classe que receberá os parametros da requisição extenda a classe BaseDynamicFilter
 // In your Entity or DTO use the @DynamicSpecAttr annotation to configure the filter properties
 @Entity
 @Table(name = "countries")
@@ -185,7 +173,9 @@ public class Countries {
 // Faça o seguinte import
 // Do the following import
 import com.eleodorodev.specification.params.QueryString;
+import com.eleodorodev.specification.params.annotation.DynamicArgsParam;
 ```
+
 ```java
 // Em seguida ao invés de usar um @RequestBody usaremos um @RequestParam do tipo QueryString
 // Chame o DynamicSpecification.bind e passe como parametro a classe onde foi configurado seus @DynamicSpecAttr
@@ -194,7 +184,7 @@ import com.eleodorodev.specification.params.QueryString;
 // Then instead of using a @RequestBody we will use a @RequestParam of type QueryString
 // Call DynamicSpecification.bind and pass as a parameter the class where your @DynamicSpecAttr was configured
 // And the queryString
-public Collection<Countries> exemple(@RequestParam(name = "q") QueryString queryString) {
+public Collection<Countries> exemple(@DynamicArgsParam QueryString queryString) {
     return repository.findAll(DynamicSpecification.bind(Countries.class,queryString));
 }
 ```
@@ -212,8 +202,8 @@ This way, the user can call the url and filter however they want, using the and,
 
 ```java
 // Basta chamar o queryString.searchURL(true) para habilitar 
-public Collection<Countries> exemple(@RequestParam(name = "q") QueryString queryString) {
-    return repository.findAll(DynamicSpecification.bind(Countries.class,queryString.searchURL(true)));
+public Collection<Countries> exemple(@QueryArgsParam(search = true) QueryString queryString) {
+    return repository.findAll(DynamicSpecification.bind(Countries.class,queryString));
 }
 ```
 ```http request

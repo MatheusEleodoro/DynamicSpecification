@@ -19,7 +19,7 @@ import java.util.Map;
  * @see <a href="https://github.com/MatheusEleodoro">...</a>
  */
 
-public abstract class BaseDynamicFilter implements Serializable {
+public abstract class DynamicFilterImpl implements Serializable {
 
     public QueryString toQueryString() {
         Map<String, Pair<Object, String>> map = new HashMap<>();
