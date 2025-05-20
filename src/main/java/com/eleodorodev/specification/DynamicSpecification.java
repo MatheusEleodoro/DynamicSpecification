@@ -5,8 +5,8 @@ import com.eleodorodev.specification.annotation.DynamicSpecAttr;
 import com.eleodorodev.specification.enums.Conditional;
 import com.eleodorodev.specification.enums.Conjunction;
 import com.eleodorodev.specification.exception.DynamicSpecificationException;
-import com.eleodorodev.specification.params.QueryString;
-import com.eleodorodev.specification.params.QueryStringConverter;
+import com.eleodorodev.specification.params.DynamicArgs;
+import com.eleodorodev.specification.params.DynamicArgsConverter;
 import com.eleodorodev.specification.params.deserialize.ListDeserializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.annotation.Nullable;
@@ -41,33 +41,33 @@ public interface DynamicSpecification<T> extends Specification<T> {
      * Links the query string received in the request url, and builds a query specification
      *
      * @param clazz     Class with the annotation {@link DynamicSpecAttr}
-     * @param QueryString Object {@link QueryString} Received by {@link RequestParam @RequestParam QueryString}
+     * @param DynamicArgs Object {@link DynamicArgs} Received by {@link RequestParam @RequestParam QueryString}
      * @return {@link Specification}
      */
-    static <R, T> Specification<R> bind(Class<T> clazz, QueryString QueryString) throws DynamicSpecificationException {
+    static <R, T> Specification<R> bind(Class<T> clazz, DynamicArgs DynamicArgs) throws DynamicSpecificationException {
         try {
             AtomicReference<Specification<R>> spec = new AtomicReference<>();
             AtomicBoolean first = new AtomicBoolean(true);
 
 
-            QueryString QueryStringLocal = Objects.requireNonNullElse(QueryString, new QueryString(new HashMap<>()));
+            DynamicArgs dynamicArgsLocal = Objects.requireNonNullElse(DynamicArgs, new DynamicArgs(new HashMap<>()));
 
             var values = Stream.of(clazz.getDeclaredFields())
                 .flatMap(field -> AnnotatedElementUtils.findAllMergedAnnotations(field, DynamicSpecAttr.class).stream()
                     .map(annotation -> Map.entry(field, annotation)))
-                .filter(n -> QueryStringLocal.value().containsKey(n.getValue().property()) || QueryStringLocal.value().containsKey(n.getValue().alias()))
+                .filter(n -> dynamicArgsLocal.value().containsKey(n.getValue().property()) || dynamicArgsLocal.value().containsKey(n.getValue().alias()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
             values.forEach((key, specAttr) -> {
                 Conditional conditional = specAttr.conditional();
                 Conjunction conjunction = specAttr.conjunction();
 
-                Pair<Object, String> params = Binder.getArgsValues(key, specAttr, QueryStringLocal);
+                Pair<Object, String> params = Binder.getArgsValues(key, specAttr, dynamicArgsLocal);
 
                 Object value = params.getFirst();
                 boolean negate = specAttr.negate();
 
-                if (QueryStringLocal.search() && !params.getSecond().isEmpty()) {
+                if (dynamicArgsLocal.search() && !params.getSecond().isEmpty()) {
                     List<String> args = new ArrayList<>(Arrays.asList(params.getSecond().split(",")));
                     List<String> validArgs = new ArrayList<>(Arrays.stream(Conjunction.values()).map(Enum::name).toList());
                     validArgs.addAll(Arrays.stream(Conditional.values()).map(Enum::name).toList());
@@ -137,13 +137,13 @@ public interface DynamicSpecification<T> extends Specification<T> {
                 case BW ->
                     spec.and(negate ? DynamicFilter.toNotBetween(element.getFirst(), element.get(1), property, parents) : DynamicFilter.toBetween(element.getFirst(), element.get(1), property, parents));
                 case GT ->
-                    spec.and(DynamicFilter.toGreater(QueryStringConverter.parseNumber(value.toString()), property, parents));
+                    spec.and(DynamicFilter.toGreater(DynamicArgsConverter.parseNumber(value.toString()), property, parents));
                 case GTE ->
-                    spec.and(DynamicFilter.toGreaterEqualTo(QueryStringConverter.parseNumber(value.toString()), property, parents));
+                    spec.and(DynamicFilter.toGreaterEqualTo(DynamicArgsConverter.parseNumber(value.toString()), property, parents));
                 case LT ->
-                    spec.and(DynamicFilter.toLess(QueryStringConverter.parseNumber(value.toString()), property, parents));
+                    spec.and(DynamicFilter.toLess(DynamicArgsConverter.parseNumber(value.toString()), property, parents));
                 case LTE ->
-                    spec.and(DynamicFilter.toLessEqualTo(QueryStringConverter.parseNumber(value.toString()), property, parents));
+                    spec.and(DynamicFilter.toLessEqualTo(DynamicArgsConverter.parseNumber(value.toString()), property, parents));
                 default ->
                     spec.and(negate ? DynamicFilter.toNotEquals(value, property, parents) : DynamicFilter.toEquals(value, property, parents));
             };
@@ -168,13 +168,13 @@ public interface DynamicSpecification<T> extends Specification<T> {
                 case BW ->
                     spec.or(negate ? DynamicFilter.toNotBetween(element.getFirst(), element.get(1), property, parents) : DynamicFilter.toBetween(element.getFirst(), element.get(1), property, parents));
                 case GT ->
-                    spec.or(DynamicFilter.toGreater(QueryStringConverter.parseNumber(value.toString()), property, parents));
+                    spec.or(DynamicFilter.toGreater(DynamicArgsConverter.parseNumber(value.toString()), property, parents));
                 case GTE ->
-                    spec.or(DynamicFilter.toGreaterEqualTo(QueryStringConverter.parseNumber(value.toString()), property, parents));
+                    spec.or(DynamicFilter.toGreaterEqualTo(DynamicArgsConverter.parseNumber(value.toString()), property, parents));
                 case LT ->
-                    spec.or(DynamicFilter.toLess(QueryStringConverter.parseNumber(value.toString()), property, parents));
+                    spec.or(DynamicFilter.toLess(DynamicArgsConverter.parseNumber(value.toString()), property, parents));
                 case LTE ->
-                    spec.or(DynamicFilter.toLessEqualTo(QueryStringConverter.parseNumber(value.toString()), property, parents));
+                    spec.or(DynamicFilter.toLessEqualTo(DynamicArgsConverter.parseNumber(value.toString()), property, parents));
                 default ->
                     spec.or(negate ? DynamicFilter.toNotEquals(value, property, parents) : DynamicFilter.toEquals(value, property, parents));
             };
@@ -198,13 +198,13 @@ public interface DynamicSpecification<T> extends Specification<T> {
                 case BW ->
                     Specification.where(negate ? DynamicFilter.toNotBetween(element.getFirst(), element.get(1), property, parents) : DynamicFilter.toBetween(element.getFirst(), element.get(1), property, parents));
                 case GT ->
-                    Specification.where(DynamicFilter.toGreater(QueryStringConverter.parseNumber(value.toString()), property, parents));
+                    Specification.where(DynamicFilter.toGreater(DynamicArgsConverter.parseNumber(value.toString()), property, parents));
                 case GTE ->
-                    Specification.where(DynamicFilter.toGreaterEqualTo(QueryStringConverter.parseNumber(value.toString()), property, parents));
+                    Specification.where(DynamicFilter.toGreaterEqualTo(DynamicArgsConverter.parseNumber(value.toString()), property, parents));
                 case LT ->
-                    Specification.where(DynamicFilter.toLess(QueryStringConverter.parseNumber(value.toString()), property, parents));
+                    Specification.where(DynamicFilter.toLess(DynamicArgsConverter.parseNumber(value.toString()), property, parents));
                 case LTE ->
-                    Specification.where(DynamicFilter.toLessEqualTo(QueryStringConverter.parseNumber(value.toString()), property, parents));
+                    Specification.where(DynamicFilter.toLessEqualTo(DynamicArgsConverter.parseNumber(value.toString()), property, parents));
                 default ->
                     Specification.where(negate ? DynamicFilter.toNotEquals(value, property, parents) : DynamicFilter.toEquals(value, property, parents));
             };
@@ -227,7 +227,7 @@ public interface DynamicSpecification<T> extends Specification<T> {
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     class Binder {
 
-        static Pair<Object, String> getArgsValues(Field key ,DynamicSpecAttr specAttr,  QueryString args) {
+        static Pair<Object, String> getArgsValues(Field key ,DynamicSpecAttr specAttr,  DynamicArgs args) {
             Pair<Object, String> params = args.value().getOrDefault(specAttr.property(), args.value().get(specAttr.alias()));
             JsonDeserialize deserialize = key.getAnnotation(JsonDeserialize.class);
             if (deserialize != null && deserialize.using().equals(ListDeserializer.class) &&

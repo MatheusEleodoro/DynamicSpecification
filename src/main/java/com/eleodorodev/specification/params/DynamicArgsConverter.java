@@ -1,15 +1,21 @@
 package com.eleodorodev.specification.params;
 
-import com.eleodorodev.specification.params.annotation.DynamicArgsParam;
+import com.eleodorodev.specification.exception.DynamicParamArgumentException;
+import com.eleodorodev.specification.params.annotation.DynamicParam;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.springframework.data.util.Pair;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -20,7 +26,8 @@ import java.util.stream.Stream;
  * @see <a href="https://github.com/MatheusEleodoro">GitHub Profile</a>
  */
 @Component
-public class QueryStringConverter {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class DynamicArgsConverter {
 
     /**
      * Parses a string into a number (Double, BigDecimal, or returns the original string if parsing fails).
@@ -52,31 +59,42 @@ public class QueryStringConverter {
      * @return A map where the key is the parameter name and the value is a pair of the parameter value and its type.
      * @throws IllegalArgumentException If the URL parameter map is empty.
      */
-    public static Map<String, Pair<Object, String>> apply(HttpServletRequest request, DynamicArgsParam annotation) {
-        Map<String, String[]> map = request.getParameterMap();
+    public static DynamicArgs converter(HttpServletRequest request, DynamicParam annotation) {
+        String paramName = annotation.name();
+        String query = request.getQueryString();
 
-        String firstKey = map.keySet().stream()
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("URL Map is empty"));
+        if (query == null || !query.contains(paramName + "=")) {
+            if (!annotation.required()) return DynamicArgs.instance();
+            throw new DynamicParamArgumentException("Expected QueryArg parameter '" + paramName + "' not found.");
+        }
 
-        var listMaps = Arrays.stream(map.get(firstKey)).map(e -> Map.of(e.split("=")[0], e.split("=")[1]))
-            .toList();
+        int index = query.indexOf(paramName + "=");
+        String paramString = query.substring(index + paramName.length() + 1);
 
-        Map<String, Pair<Object, String>> params = new HashMap<>();
-        listMaps.forEach(mp -> mp.forEach((key, v) -> params.put(key, getPair(v.split(";")))));
+        try {
+            paramString = URLDecoder.decode(paramString, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Failed to decode query string.", e);
+        }
 
-        map.forEach((k, v) -> {
-            if (!Objects.equals(k, firstKey)) {
-                params.put(k, getPair(v[0].split(";")));
-            }
-        });
+        Map<String, Pair<Object, String>> params = Arrays.stream(paramString.split("&"))
+                .filter(pair -> !pair.isBlank())
+                .map(pair -> pair.split("=", 2))
+                .filter(kv -> kv.length > 1 && !kv[1].isBlank())
+                .collect(Collectors.toMap(
+                        kv -> kv[0],
+                        kv -> getPair(kv[1].split(";")),
+                        (existing, replacement) -> replacement,
+                        HashMap::new
+                ));
 
-        if (annotation.pageable())
+        if (annotation.pageable()) {
             PublicResolverNames.paramsNames().forEach(params::remove);
+        }
 
-        params.remove("page");
-
-        return params;
+        return new DynamicArgs(params)
+                .search(annotation.search())
+                .type(annotation.type());
     }
 
     /**
@@ -87,7 +105,7 @@ public class QueryStringConverter {
      */
     private static Pair<Object, String> getPair(String[] param) {
         return Pair.of(param[0].contains(",") ? Stream.of(param[0].split(","))
-                .map(QueryStringConverter::parseNumber).toList() : parseNumber(param[0]),
+                .map(DynamicArgsConverter::parseNumber).toList() : parseNumber(param[0]),
             param.length > 1 ? param[1].replace(">", "") : "");
     }
 

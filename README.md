@@ -1,4 +1,4 @@
-# Dynamic Specification! `1.0.0`
+# Dynamic Specification! `1.0.1`
 
 ## O que é? / What is it?
 É um conjunto de funcionalidades que permite configurar e habilitar filtros dinâmicos em APIs Java Spring. As implementações contidas aqui permitem a criação simplificada de consultas e queries complexas com uma implementação muito fácil.
@@ -7,11 +7,11 @@ It is a set of functionalities that allows configuring and enabling dynamic filt
 
 
 ## Recursos / Features
-- 🔎 **QueryString:** Um recurso bastante comum em serviços na internet, agora habilitado para uso em suas APIs Java.
+- 🔎 **DynamicArgs:** Um recurso bastante comum em serviços na internet, agora habilitado para uso em suas APIs Java.
 - 💻 **DynamicFilter:** É possível criar filtros dinâmicos para consultas sem a necessidade de múltiplas queries ou condições de ifs para atender possibilidades de parâmetros.
 - ♾️ **DynamicRepository:** Repositório unificado do JPARepository e JpaSpecificationExecutor.<br>
 - - -
-- 🔎 **QueryString:** A commonly used feature in web services, now enabled for use in your Java APIs.
+- 🔎 **DynamicArgs:** A commonly used feature in web services, now enabled for use in your Java APIs.
 - 💻 **DynamicFilter:** It's possible to create dynamic filters for queries without the need for multiple queries or if conditions to handle parameter possibilities.
 - ♾️ **DynamicRepository:** Unified repository of JPARepository and JpaSpecificationExecutor.
 
@@ -127,12 +127,12 @@ public class Form extends BaseDynamicFilter {
 ```
 ```java
 // Chame o DynamicSpecification.bind e passar como parametro a classe onde foi configurado seus @DynamicSpecAttr 
-// E passe a classe que extendeu BaseDynamicFilter chamando o método toQueryString()
+// E passe a classe que extendeu BaseDynamicFilter chamando o método toDynamicArgs()
 
 // Call DynamicSpecification.bind and pass as a parameter the class where your @DynamicSpecAttr 
-// And pass the class that extended BaseDynamicFilter by calling the toQueryString() method
+// And pass the class that extended BaseDynamicFilter by calling the toDynamicArgs() method
 public Collection<Countries> exemple(@RequestBody(required = false) Form form) {
-    return repository.findAll(DynamicSpecification.bind(Countries.class,form.toQueryString()));
+    return repository.findAll(DynamicSpecification.bind(Countries.class,form.toDynamicArgs()));
 }
 ```
 ```json5
@@ -169,23 +169,22 @@ public class Countries {
     private String population;
 }
 ```
+
 ```java
 // Faça o seguinte import
 // Do the following import
-import com.eleodorodev.specification.params.QueryString;
-import com.eleodorodev.specification.params.annotation.DynamicArgsParam;
 ```
 
 ```java
-// Em seguida ao invés de usar um @RequestBody usaremos um @RequestParam do tipo QueryString
+// Em seguida ao invés de usar um @RequestBody usaremos um @RequestParam do tipo DynamicArgs
 // Chame o DynamicSpecification.bind e passe como parametro a classe onde foi configurado seus @DynamicSpecAttr
-// E a queryString
+// E a dynamicArgs
 
-// Then instead of using a @RequestBody we will use a @RequestParam of type QueryString
+// Then instead of using a @RequestBody we will use a @RequestParam of type DynamicArgs
 // Call DynamicSpecification.bind and pass as a parameter the class where your @DynamicSpecAttr was configured
-// And the queryString
-public Collection<Countries> exemple(@DynamicArgsParam QueryString queryString) {
-    return repository.findAll(DynamicSpecification.bind(Countries.class,queryString));
+// And the dynamicArgs
+public Collection<Countries> exemple(@DynamicArgsParam DynamicArgs dynamicArgs) {
+    return repository.findAll(DynamicSpecification.bind(Countries.class,dynamicArgs));
 }
 ```
 Dessa forma agora podemos usar os filtros por parametros de url da seguinte forma\
@@ -201,9 +200,9 @@ We can provide even more freedom and dynamism in the query by allowing the endpo
 This way, the user can call the url and filter however they want, using the and, or, equals, between, contains, etc. filters.
 
 ```java
-// Basta chamar o queryString.searchURL(true) para habilitar 
-public Collection<Countries> exemple(@QueryArgsParam(search = true) QueryString queryString) {
-    return repository.findAll(DynamicSpecification.bind(Countries.class,queryString));
+// Basta chamar o dynamicArgs.searchURL(true) para habilitar 
+public Collection<Countries> exemple(@DynamicParam(search = true) DynamicArgs dynamicArgs) {
+    return repository.findAll(DynamicSpecification.bind(Countries.class,dynamicArgs));
 }
 ```
 ```http request

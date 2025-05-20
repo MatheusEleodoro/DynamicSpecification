@@ -13,10 +13,15 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 public @interface DynamicSpecAttr {
-  String property();
-  String alias() default "";
-  String[] parents() default {};
-  Conjunction conjunction() default Conjunction.AND;
-  Conditional conditional() default Conditional.EQ;
-  boolean negate() default false;
+    String property();
+
+    String alias() default "";
+
+    String[] parents() default {};
+
+    Conjunction conjunction() default Conjunction.AND;
+
+    Conditional conditional() default Conditional.EQ;
+
+    boolean negate() default false;
 }

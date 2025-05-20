@@ -1,46 +1,38 @@
 package com.eleodorodev.specification.web;
 
-import com.eleodorodev.specification.params.QueryString;
-import com.eleodorodev.specification.params.QueryStringConverter;
-import com.eleodorodev.specification.params.annotation.DynamicArgsParam;
+import com.eleodorodev.specification.params.DynamicArgs;
+import com.eleodorodev.specification.params.DynamicArgsConverter;
+import com.eleodorodev.specification.params.annotation.DynamicParam;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.NonNull;
 import org.springframework.core.MethodParameter;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import java.util.Map;
-
 @Component
 public class QueryArgsHandlerMethodResolver implements HandlerMethodArgumentResolver {
 
-  @Override
-  public boolean supportsParameter(@NonNull MethodParameter parameter) {
-    return parameter.hasParameterAnnotation(DynamicArgsParam.class) &&
-        parameter.getParameterType().equals(QueryString.class);
-  }
-
-  @Override
-  public Object resolveArgument(@NonNull MethodParameter parameter,
-                                ModelAndViewContainer mavContainer,
-                                @NonNull NativeWebRequest webRequest,
-                                WebDataBinderFactory binderFactory) {
-
-    var annotation = parameter.getParameterAnnotation(DynamicArgsParam.class);
-    if(annotation == null) {
-      return null;
+    @Override
+    public boolean supportsParameter(@NonNull MethodParameter parameter) {
+        return parameter.hasParameterAnnotation(DynamicParam.class) &&
+                parameter.getParameterType().equals(DynamicArgs.class);
     }
-    boolean searchable = annotation.search();
 
-    HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
-    assert request != null;
+    @NonNull
+    @Override
+    public Object resolveArgument(@NonNull MethodParameter parameter,
+                                  ModelAndViewContainer mavContainer,
+                                  @NonNull NativeWebRequest webRequest,
+                                  WebDataBinderFactory binderFactory) {
 
-    Map<String, Pair<Object, String>> params = QueryStringConverter.apply(request, annotation);
+        var annotation = parameter.getParameterAnnotation(DynamicParam.class);
+        HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
 
-    return new QueryString(params).search(searchable);
-  }
+        var args = DynamicArgsConverter.converter(request, annotation);
+        args.validate(annotation);
+        return args;
+    }
 }

@@ -2,6 +2,8 @@ package com.eleodorodev.specification.params;
 
 
 import com.eleodorodev.specification.enums.Conditional;
+import com.eleodorodev.specification.exception.DynamicParamValidationException;
+import com.eleodorodev.specification.params.annotation.DynamicParam;
 import com.eleodorodev.specification.params.deserialize.ListDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -20,7 +22,7 @@ import java.util.stream.Collectors;
 @Getter
 @Accessors(fluent = true)
 @RequiredArgsConstructor
-public class QueryString {
+public class DynamicArgs {
 
     @NonNull
     private Map<String, Pair<Object, String>> value;
@@ -29,6 +31,9 @@ public class QueryString {
      */
     @Setter
     private boolean search;
+
+    @Setter
+    private Class<?> type;
 
     public <T> T toObj(Class<T> type) {
         Map<String, Object> map = this.value()
@@ -42,18 +47,28 @@ public class QueryString {
         return mapper.convertValue(map, type);
     }
 
-    public static QueryString instance() {
-        return new QueryString(new HashMap<>());
+    public static DynamicArgs instance() {
+        return new DynamicArgs(new HashMap<>());
     }
 
-    public QueryString withParams(String paramName, Object value, Conditional conditional) {
+    public DynamicArgs withParams(String paramName, Object value, Conditional conditional) {
         this.value.put(paramName, Pair.of(value, conditional.name()));
         return this;
     }
 
-    public QueryString withParams(String paramName, Object value) {
+    public DynamicArgs withParams(String paramName, Object value) {
         this.value.put(paramName, Pair.of(value, ""));
         return this;
+    }
+
+    public void validate(DynamicParam dynamicParam) throws DynamicParamValidationException {
+        var error = Arrays.stream(dynamicParam.mandatory())
+                .filter(mandatory -> !this.value.containsKey(mandatory))
+                .map(mandatory-> "DynamicArgs parameter '" + mandatory + "' is mandatory. ")
+                .collect(Collectors.joining());
+        if(!error.isEmpty()) {
+            throw new DynamicParamValidationException(error,getClass());
+        }
     }
 }
 

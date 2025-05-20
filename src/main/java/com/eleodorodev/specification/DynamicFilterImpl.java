@@ -1,6 +1,6 @@
 package com.eleodorodev.specification;
 
-import com.eleodorodev.specification.params.QueryString;
+import com.eleodorodev.specification.params.DynamicArgs;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.data.util.Pair;
@@ -21,7 +21,7 @@ import java.util.Map;
 
 public abstract class DynamicFilterImpl implements Serializable {
 
-    public QueryString toQueryString() {
+    public DynamicArgs toDynamicArgs() {
         Map<String, Pair<Object, String>> map = new HashMap<>();
         BeanWrapper wrapper = new BeanWrapperImpl(this);
 
@@ -32,6 +32,6 @@ public abstract class DynamicFilterImpl implements Serializable {
                 map.put(propertyName, Pair.of(propertyValue, ""));
             }
         }
-        return new QueryString(map);
+        return new DynamicArgs(map);
     }
 }
